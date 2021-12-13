@@ -25,9 +25,11 @@ struct Path {
 };
 
 int numPathsPart1(std::vector<Path> paths, std::vector<std::string>& visitedCaves, std::string currentCave);
+int numPathsPart2(std::vector<Path> paths, std::vector<std::string>& visitedCaves, std::string currentCave, bool& visitedTwice);
 bool hasValidReturn(std::vector<Path> paths, std::string cave);
 bool isStrLower(std::string s);
 std::vector<std::string> nextCaves(std::vector<Path> paths, std::vector<std::string> visitedCaves, std::string cave);
+std::vector<std::string> nextCavesPart2(std::vector<Path> paths, std::vector<std::string> visitedCaves, std::string cave, bool visitedTwice, std::vector<std::string>& lowerCaseTwice);
 std::vector<std::string> getUniqueCaves(std::vector<Path> paths);
 
 int main() {
@@ -35,7 +37,7 @@ int main() {
     std::ifstream stream;
     std::vector<std::string> input;
     std::vector<Path> paths;
-    int pathCount1 = 0;
+    int pathCount1 = 0, pathCount2 = 0;
 
     //Open file
     stream.open("input.txt");
@@ -72,7 +74,11 @@ int main() {
     //Print result to screen
     logLine(pathCount1);
 
-    //Unable to solve part 2
+    bool visitedTwice = false;
+    pathCount2 = numPathsPart2(paths, visitedCaves, "start", visitedTwice);
+
+    //Print Result to screen
+    logLine(pathCount2);
 
     return 0;
 }
@@ -98,6 +104,37 @@ int numPathsPart1(std::vector<Path> paths, std::vector<std::string>& visitedCave
     return num;
 }
 
+int numPathsPart2(std::vector<Path> paths, std::vector<std::string>& visitedCaves, std::string currentCave, bool& visitedTwice) {
+    int num = 0;
+    visitedCaves.push_back(currentCave);
+    if (isStrLower(currentCave) && visitedTwice) {
+        if (!hasValidReturn(paths, currentCave)) {
+            visitedCaves.pop_back();
+            return 0;
+        }
+    }
+    if (currentCave == "end") {
+        visitedCaves.pop_back();
+        return 1;
+    }
+    std::vector<std::string> lowerCaseTwice;
+    std::vector<std::string> connectedCaves = nextCavesPart2(paths, visitedCaves, currentCave, visitedTwice, lowerCaseTwice);
+    for (std::string c : connectedCaves) {
+        bool matched = false;
+        for (std::string visitedTwiceCave : lowerCaseTwice) {
+            if (c == visitedTwiceCave) {
+                matched = true;
+                visitedTwice = true;
+                num += numPathsPart2(paths, visitedCaves, c, visitedTwice);
+                visitedTwice = false;
+            }
+        }
+        if (!matched) num += numPathsPart2(paths, visitedCaves, c, visitedTwice);
+    }
+    visitedCaves.pop_back();
+    return num;
+}
+
 bool hasValidReturn(std::vector<Path> paths, std::string cave) {
     for (Path p : paths) {
         if (p.caveA == cave || p.caveB == cave) {
@@ -117,6 +154,28 @@ std::vector<std::string> nextCaves(std::vector<Path> paths, std::vector<std::str
         if (nextCave.empty() || nextCave == "start") continue;
         for (std::string visitedCave : visitedCaves) {
             if (nextCave == visitedCave && isStrLower(nextCave)) validCave = false;
+        }
+        if (validCave) next.push_back(nextCave);
+    }
+    return next;
+}
+
+std::vector<std::string> nextCavesPart2(std::vector<Path> paths, std::vector<std::string> visitedCaves, std::string cave, bool visitedTwice, std::vector<std::string>& lowerCaseTwice) {
+    std::vector<std::string> next;
+    for (Path p : paths) {
+        std::string nextCave = "";
+        bool validCave = true;
+        if (p.caveA == cave) nextCave = p.caveB;
+        else if (p.caveB == cave) nextCave = p.caveA;
+        if (nextCave.empty() || nextCave == "start") continue;
+        for (std::string visitedCave : visitedCaves) {
+            if (nextCave == visitedCave && isStrLower(nextCave)) {
+                if (visitedTwice) {
+                    validCave = false;
+                } else {
+                    lowerCaseTwice.push_back(nextCave);
+                }
+            }
         }
         if (validCave) next.push_back(nextCave);
     }
