@@ -114,6 +114,11 @@ void setCharacterCounts(std::unordered_map<char, long long int>& characterCounts
         characterCounts[c1] += itr->second;
         characterCounts[c2] += itr->second;
     }
+    characterCounts[polymerTemplate.at(0)]++;
+    characterCounts[polymerTemplate.at(polymerTemplate.size()-1)]++;
+    for (auto itr = characterCounts.begin(); itr != characterCounts.end(); itr++) {
+        itr->second /= 2;
+    }
 }
 
 void initializeCharacterCounts(std::unordered_map<char, long long int>& characterCount) {
@@ -134,7 +139,7 @@ long long int getDifference(std::unordered_map<char, long long int> map) {
             min = itr->second;
         }
     }
-    
-    //Then, return the difference of the max/2 and min/2+1 [Note, this formula will change depending on input]
-    return (max/2) - (min/2+1);
+
+    //Then, return the difference of max and min
+    return max - min;
 }
