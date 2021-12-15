@@ -1,10 +1,10 @@
 /*
     Programmer: Tony Montemuro
-    Date: 12/13/2021
-    About: Advent of Code: Day 13 Solution
+    Date: 12/14/2021
+    About: Advent of Code: Day 14 Solution
     To run file:
-        g++ day13.cpp -o day13.exe
-        ./day13
+        g++ day14.cpp -o day14.exe
+        ./day14
 */
 
 #include <iostream>
